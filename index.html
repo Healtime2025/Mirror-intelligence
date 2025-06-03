@@ -24,8 +24,12 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      margin-bottom: 20px;
+      margin: 10px 10px 20px 0;
+    }
+    select {
+      padding: 8px;
       margin-right: 10px;
+      font-size: 16px;
     }
     .headline {
       background: white;
@@ -49,9 +53,9 @@
 <body>
 <h1>🧠 Mirror Intel – Daily News Briefing</h1>
 
-<!-- 🌐 Source Selector -->
-<label for="source-select"><strong>🌐 Select News Source:</strong></label>
-<select id="source-select" style="margin-bottom: 20px; padding: 8px; font-size: 16px;">
+<!-- Selectors -->
+<label><strong>🌐 Select News Source:</strong></label>
+<select id="source-select">
   <option disabled selected>────────</option>
   <option value="bbc">🌐 BBC World</option>
   <option value="cnn">🌐 CNN</option>
@@ -60,9 +64,8 @@
   <option value="mg">🇿🇦 ZA Mail & Guardian</option>
 </select>
 
-<!-- 🌐 Topic Selector -->
-<label for="topic-select"><strong>🧠 Choose Topic:</strong></label>
-<select id="topic-select" style="margin-bottom: 20px; padding: 8px; font-size: 16px;">
+<label><strong>🧠 Choose Topic:</strong></label>
+<select id="topic-select">
   <option value="">-- All Topics --</option>
   <option value="tech">Technology</option>
   <option value="health">Health</option>
@@ -74,6 +77,7 @@
   <option value="africa">Africa</option>
 </select>
 
+<!-- Log topic -->
 <script>
   document.getElementById("topic-select").addEventListener("change", function () {
     const topic = this.value;
@@ -81,6 +85,7 @@
   });
 </script>
 
+<!-- Action Buttons -->
 <button onclick="fetchNews()">Fetch Today’s Headlines</button>
 <div id="news-container"></div>
 <button id="next-btn" onclick="showNextPage()" style="display:none;">Next ➡️</button>
@@ -93,6 +98,7 @@
 <div id="mirror-summary"></div>
 <div id="gpt-digest"></div>
 
+<!-- Core Scripts -->
 <script>
 function summarizeNews() {
   const articles = document.querySelectorAll(".headline");
@@ -138,7 +144,6 @@ async function generateAIDigest() {
 
     const result = await res.json();
     summaryBox.textContent = `🧠 GPT Digest:\n\n${result.summary}`;
-
   } catch (error) {
     console.error("GPT Summary Error:", error);
     summaryBox.textContent = "⚠️ Failed to generate GPT digest.";
@@ -163,7 +168,7 @@ function saveToVisionFlow() {
 }
 </script>
 
-<!-- ✅ Wrapped Pagination Logic in Correct Script Tag -->
+<!-- Pagination + Fetch Logic -->
 <script>
 let fullArticles = [];
 let currentPage = 0;
