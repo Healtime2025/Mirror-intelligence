@@ -1,0 +1,8 @@
+{
+  "name": "mirror-intel-newstoday",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "dependencies": {
+    "rss-parser": "^3.12.0"
+  }
+}
