@@ -87,8 +87,7 @@
 </script>
 
 <button onclick="fetchNews()">Fetch Today’s Headlines</button>
-<div id="news-container"></div>
-<!-- ✅ PATCH: Next button added just below news container -->
+<div id="news-container"></div> <!-- ✅ FIXED closing div -->
 <button id="next-btn" onclick="showNextPage()" style="display:none;">Next ➡️</button>
 
 <!-- Control Buttons -->
@@ -169,7 +168,6 @@ function saveToVisionFlow() {
 }
 </script>
 
-<!-- ✅ Existing Pagination & Feed Script -->
 <script>
 let fullArticles = [];
 let currentPage = 0;
