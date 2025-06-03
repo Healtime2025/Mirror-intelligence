@@ -59,6 +59,29 @@
   <option value="timeslive">🇿🇦 ZA TimesLIVE</option>
   <option value="mg">🇿🇦 ZA Mail & Guardian</option>
 </select>
+<!-- 🌐 Topic Selector -->
+<label for="topic-select"><strong>🧠 Choose Topic:</strong></label>
+<select id="topic-select" style="margin-bottom: 20px; padding: 8px; font-size: 16px;">
+  <option value="">-- All Topics --</option>
+  <option value="tech">Technology</option>
+  <option value="health">Health</option>
+  <option value="finance">Finance</option>
+  <option value="politics">Politics</option>
+  <option value="climate">Climate</option>
+  <option value="education">Education</option>
+  <option value="security">Security</option>
+  <option value="africa">Africa</option>
+</select>
+
+<script>
+  // Listen for topic selection (Optional placeholder logic)
+  document.getElementById("topic-select").addEventListener("change", function () {
+    const topic = this.value;
+    console.log("🔍 Selected Topic:", topic);
+    // Optional: Integrate into fetchNews() via topic param if needed
+    // e.g., fetchNews(topic)
+  });
+</script>
 
 <button onclick="fetchNews()">Fetch Today’s Headlines</button>
 <div id="news-container"></div>
@@ -172,5 +195,15 @@ summaryBox.textContent = `🧠 GPT Digest:\n\n${result.summary}`;
       alert("🧠 Summary saved to VisionFlow (simulated). Future: Connect to backend vault.");
     }
   </script>
+  
+<script>
+  // Listen for topic selection (Optional placeholder logic)
+  document.getElementById("topic-select").addEventListener("change", function () {
+    const topic = this.value;
+    console.log("🔍 Selected Topic:", topic);
+    // Optional: Integrate into fetchNews() via topic param if needed
+    // e.g., fetchNews(topic)
+  });
+</script>
 </body>
 </html>
