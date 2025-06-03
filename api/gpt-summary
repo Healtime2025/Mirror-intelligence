@@ -14,8 +14,8 @@ module.exports = async function handler(req, res) {
   try {
     const { articles } = req.body;
 
-    if (!articles || !Array.isArray(articles) || articles.length === 0) {
-      return res.status(400).json({ error: "Invalid articles array" });
+    if (!Array.isArray(articles) || articles.length === 0) {
+      return res.status(400).json({ error: "No articles provided" });
     }
 
     const content = articles
@@ -23,18 +23,28 @@ module.exports = async function handler(req, res) {
       .map((a, i) => `${i + 1}. ${a.title} – ${a.description || 'No summary'}`)
       .join("\n");
 
-    const prompt = `You are Mirror Intel. Summarize the following news headlines into a short digest for today:\n\n${content}\n\nGPT Digest:`;
+    const prompt = `
+You are Mirror Intel, the world's smartest news digest assistant.
+
+Summarize the following headlines into a sharp, short and insightful briefing for today's readers:
+
+${content}
+
+Use 3-5 sentences. No fluff. Start the summary with "🧠 GPT Digest:".
+    `.trim();
 
     const completion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: prompt }],
     });
 
-    const summary = completion.data.choices[0].message.content;
+    const summary = completion.data.choices[0].message.content.trim();
     return res.status(200).json({ summary });
 
   } catch (error) {
     console.error("❌ GPT API Error:", error);
-    return res.status(500).json({ error: error.message || "GPT summarization failed." });
+    return res.status(500).json({
+      error: error?.response?.data || error.message || "GPT summarization failed.",
+    });
   }
 };
