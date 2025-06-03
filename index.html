@@ -49,6 +49,7 @@
 </head>
 <body>
   <h1>🧠 Mirror Intel</h1>
+
   <select id="source-select">
     <option value="bbc">BBC</option>
     <option value="cnn">CNN</option>
@@ -82,34 +83,64 @@
     async function fetchNews() {
       const source = document.getElementById("source-select").value;
       const category = document.getElementById("category-select").value;
-      const res = await fetch(`/api/fetch-news?source=${source}&category=${category}`);
-      const data = await res.json();
-
       const container = document.getElementById("headlines");
-      container.innerHTML = "";
-      currentArticles = data.articles || [];
+      container.innerHTML = "<p>🔍 Fetching news...</p>";
+      document.getElementById("gpt-digest").textContent = "";
 
-      if (!currentArticles.length) {
-        container.innerHTML = "<p>No headlines found. Try again later.</p>";
-        return;
+      try {
+        const res = await fetch(`/api/fetch-news?source=${source}&category=${category}`);
+        const data = await res.json();
+
+        currentArticles = data.articles || [];
+        container.innerHTML = "";
+
+        if (!currentArticles.length) {
+          container.innerHTML = "<p>No headlines found. Try again later.</p>";
+          return;
+        }
+
+        currentArticles.forEach(a => {
+          const div = document.createElement("div");
+          div.className = "headline";
+          div.innerHTML = `<a href="${a.url}" target="_blank">${a.title}</a><p>${a.description}</p>`;
+          container.appendChild(div);
+        });
+
+      } catch (error) {
+        container.innerHTML = `<p>⚠️ Failed to fetch news. Check your network or server logs.</p>`;
+        console.error("Fetch Error:", error);
       }
-
-      currentArticles.forEach(a => {
-        const div = document.createElement("div");
-        div.className = "headline";
-        div.innerHTML = `<a href="${a.url}" target="_blank">${a.title}</a><p>${a.description}</p>`;
-        container.appendChild(div);
-      });
     }
 
     async function summarizeNews() {
-      const res = await fetch("/api/gpt-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ articles: currentArticles })
-      });
-      const data = await res.json();
-      document.getElementById("gpt-digest").textContent = data.summary || "No digest available.";
+      const summaryBox = document.getElementById("gpt-digest");
+      summaryBox.textContent = "🤖 Thinking... generating digest...";
+
+      try {
+        const res = await fetch('/api/gpt-summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ articles: currentArticles })
+        });
+
+        let result;
+        try {
+          result = await res.json();
+        } catch (e) {
+          summaryBox.textContent = "⚠️ Failed to parse GPT response.";
+          return;
+        }
+
+        if (result.error) {
+          summaryBox.textContent = "⚠️ Failed to generate GPT digest.";
+        } else {
+          summaryBox.textContent = `🧠 GPT Digest:\n\n${result.summary}`;
+        }
+
+      } catch (error) {
+        summaryBox.textContent = "⚠️ GPT request failed. See console.";
+        console.error("GPT Error:", error);
+      }
     }
   </script>
 </body>
