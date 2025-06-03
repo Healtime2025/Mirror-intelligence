@@ -120,6 +120,7 @@
 <button onclick="speakSummary()">🔊 Speak</button>
 <button onclick="saveToVisionFlow()">📥 Save</button>
 <button onclick="toggleDarkMode()">🌓 Dark Mode</button>
+<button onclick="viewBookmarks()">📚 View Bookmarks</button>
 
 <div id="news-container"></div>
 <button id="prev-btn" onclick="showPrevPage()" style="display:none;">⬅️ Prev</button>
@@ -156,6 +157,7 @@ function displayArticles(startIndex) {
     container.appendChild(div);
   });
 
+  window.scrollTo(0, 0);
   document.getElementById("next-btn").style.display = startIndex + pageSize < fullArticles.length ? "inline-block" : "none";
   document.getElementById("prev-btn").style.display = startIndex > 0 ? "inline-block" : "none";
 }
@@ -253,10 +255,33 @@ function shareWhatsApp(url) {
 
 function bookmarkArticle(index) {
   const article = fullArticles[index];
+  article.savedAt = new Date().toLocaleString();
   const saved = JSON.parse(localStorage.getItem("mirrorBookmarks") || "[]");
   saved.push(article);
   localStorage.setItem("mirrorBookmarks", JSON.stringify(saved));
   alert("🔖 Article bookmarked!");
+}
+
+function viewBookmarks() {
+  const container = document.getElementById("news-container");
+  container.innerHTML = "";
+  const saved = JSON.parse(localStorage.getItem("mirrorBookmarks") || "[]");
+  if (!saved.length) return container.innerHTML = "<p>⚠️ No bookmarks saved yet.</p>";
+
+  saved.forEach((article, index) => {
+    const div = document.createElement("div");
+    div.className = "headline";
+    div.innerHTML = `
+      <div><strong>#${index + 1}</strong> <em>(${article.savedAt})</em></div>
+      <div><a href="${article.url}" target="_blank">${article.title}</a></div>
+      <div>${article.description || "No summary available."}</div>
+    `;
+    container.appendChild(div);
+  });
+
+  window.scrollTo(0, 0);
+  document.getElementById("next-btn").style.display = "none";
+  document.getElementById("prev-btn").style.display = "none";
 }
 
 // Auto refresh every 10 minutes
