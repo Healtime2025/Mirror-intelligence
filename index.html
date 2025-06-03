@@ -59,6 +59,7 @@
   <option value="timeslive">🇿🇦 ZA TimesLIVE</option>
   <option value="mg">🇿🇦 ZA Mail & Guardian</option>
 </select>
+
 <!-- 🌐 Topic Selector -->
 <label for="topic-select"><strong>🧠 Choose Topic:</strong></label>
 <select id="topic-select" style="margin-bottom: 20px; padding: 8px; font-size: 16px;">
@@ -74,35 +75,32 @@
 </select>
 
 <script>
-  // Listen for topic selection (Optional placeholder logic)
   document.getElementById("topic-select").addEventListener("change", function () {
     const topic = this.value;
     console.log("🔍 Selected Topic:", topic);
-    // Optional: Integrate into fetchNews() via topic param if needed
-    // e.g., fetchNews(topic)
   });
 </script>
 
 <button onclick="fetchNews()">Fetch Today’s Headlines</button>
 <div id="news-container"></div>
 
+<button onclick="summarizeNews()">🧠 Generate Mirror Summary</button>
+<button onclick="generateAIDigest()">🤖 AI Mirror Digest</button>
+<button onclick="speakSummary()">🔊 Speak Briefing</button>
+<button onclick="saveToVisionFlow()">📥 Save to VisionFlow</button>
 
-  <button onclick="summarizeNews()">🧠 Generate Mirror Summary</button>
-  <button onclick="generateAIDigest()">🤖 AI Mirror Digest</button>
-  <button onclick="speakSummary()">🔊 Speak Briefing</button>
-  <button onclick="saveToVisionFlow()">📥 Save to VisionFlow</button>
+<div id="mirror-summary"></div>
+<div id="gpt-digest"></div>
 
-  <div id="mirror-summary"></div>
-  <div id="gpt-digest"></div>
-
-  <script>
- async function fetchNews() {
+<script>
+async function fetchNews() {
   const container = document.getElementById("news-container");
   container.innerHTML = "<p>🧠 Scanning selected news feed...</p>";
 
   try {
     const selected = document.getElementById("source-select").value;
-    const res = await fetch(`/api/fetch-news?source=${selected}`);
+    const topic = document.getElementById("topic-select").value;
+    const res = await fetch(`/api/fetch-news?source=${selected}&topic=${topic}`);
     const data = await res.json();
 
     if (!data.articles || data.articles.length === 0) {
@@ -127,74 +125,74 @@
   }
 }
 
-    function summarizeNews() {
-      const articles = document.querySelectorAll(".headline");
-      const summaryBox = document.getElementById("mirror-summary");
+function summarizeNews() {
+  const articles = document.querySelectorAll(".headline");
+  const summaryBox = document.getElementById("mirror-summary");
 
-      if (articles.length === 0) {
-        summaryBox.textContent = "⚠️ Please fetch headlines first.";
-        return;
-      }
+  if (articles.length === 0) {
+    summaryBox.textContent = "⚠️ Please fetch headlines first.";
+    return;
+  }
 
-      let content = "";
-      articles.forEach((a, i) => {
-        const title = a.querySelector("a").innerText;
-        const desc = a.querySelector("div:last-child").innerText;
-        content += `${i + 1}. ${title} - ${desc}\n`;
-      });
+  let content = "";
+  articles.forEach((a, i) => {
+    const title = a.querySelector("a").innerText;
+    const desc = a.querySelector("div:last-child").innerText;
+    content += `${i + 1}. ${title} - ${desc}\n`;
+  });
 
-      const basicSummary = `Mirror Summary:\n\n${content.split("\n").slice(0, 3).join("\n")}`;
-      summaryBox.textContent = basicSummary;
-    }
-
-    async function generateAIDigest() {
-      const summaryBox = document.getElementById("gpt-digest");
-      summaryBox.textContent = "🤖 Thinking... generating digest...";
-
-      const articles = [];
-      document.querySelectorAll('.headline').forEach((el) => {
-        const title = el.querySelector('a')?.innerText || '';
-        const description = el.querySelector('div:last-child')?.innerText || '';
-        articles.push({ title, description });
-      });
-
-      try {
-       const res = await fetch('/api/gpt-summary', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ articles }),
-});
-
-if (!res.ok) {
-  throw new Error('Server returned error');
+  const basicSummary = `Mirror Summary:\n\n${content.split("\n").slice(0, 3).join("\n")}`;
+  summaryBox.textContent = basicSummary;
 }
 
-const result = await res.json();
-summaryBox.textContent = `🧠 GPT Digest:\n\n${result.summary}`;
+async function generateAIDigest() {
+  const summaryBox = document.getElementById("gpt-digest");
+  summaryBox.textContent = "🤖 Thinking... generating digest...";
 
-      } catch (error) {
-        console.error("GPT Summary Error:", error);
-        summaryBox.textContent = "⚠️ Failed to generate GPT digest.";
-      }
+  const articles = [];
+  document.querySelectorAll('.headline').forEach((el) => {
+    const title = el.querySelector('a')?.innerText || '';
+    const description = el.querySelector('div:last-child')?.innerText || '';
+    articles.push({ title, description });
+  });
+
+  try {
+    const res = await fetch('/api/gpt-summary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articles }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Server returned error');
     }
 
-    function speakSummary() {
-      const summary = document.getElementById("mirror-summary").innerText;
-      if (!summary) return;
-      const utterance = new SpeechSynthesisUtterance(summary);
-      speechSynthesis.speak(utterance);
-    }
+    const result = await res.json();
+    summaryBox.textContent = `🧠 GPT Digest:\n\n${result.summary}`;
 
-    function saveToVisionFlow() {
-      const summary = document.getElementById("mirror-summary").innerText;
-      if (!summary) {
-        alert("Nothing to save. Generate summary first.");
-        return;
-      }
-      console.log("🗂 Summary saved to VisionFlow:", summary);
-      alert("🧠 Summary saved to VisionFlow (simulated). Future: Connect to backend vault.");
-    }
-  </script>
-  
+  } catch (error) {
+    console.error("GPT Summary Error:", error);
+    summaryBox.textContent = "⚠️ Failed to generate GPT digest.";
+  }
+}
+
+function speakSummary() {
+  const summary = document.getElementById("mirror-summary").innerText;
+  if (!summary) return;
+  const utterance = new SpeechSynthesisUtterance(summary);
+  speechSynthesis.speak(utterance);
+}
+
+function saveToVisionFlow() {
+  const summary = document.getElementById("mirror-summary").innerText;
+  if (!summary) {
+    alert("Nothing to save. Generate summary first.");
+    return;
+  }
+  console.log("🗂 Summary saved to VisionFlow:", summary);
+  alert("🧠 Summary saved to VisionFlow (simulated). Future: Connect to backend vault.");
+}
+</script>
+
 </body>
 </html>
