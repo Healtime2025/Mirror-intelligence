@@ -86,8 +86,14 @@
   });
 </script>
 
+<!-- Fetch Button -->
 <button onclick="fetchNews()">Fetch Today’s Headlines</button>
-<div id="news-container"></div> <!-- ✅ FIXED closing div -->
+
+<!-- Display Area -->
+<div id="news-container"></div>
+
+<!-- ✅ PATCH: Prev + Next buttons -->
+<button id="prev-btn" onclick="showPreviousPage()" style="display:none;">⬅️ Previous</button>
 <button id="next-btn" onclick="showNextPage()" style="display:none;">Next ➡️</button>
 
 <!-- Control Buttons -->
@@ -168,6 +174,7 @@ function saveToVisionFlow() {
 }
 </script>
 
+<!-- ✅ Pagination Script with Previous + Next -->
 <script>
 let fullArticles = [];
 let currentPage = 0;
@@ -190,6 +197,8 @@ function displayArticles(startIndex) {
     container.appendChild(div);
   });
 
+  // Show/hide navigation buttons
+  document.getElementById("prev-btn").style.display = currentPage > 0 ? "inline-block" : "none";
   document.getElementById("next-btn").style.display =
     startIndex + pageSize < fullArticles.length ? "inline-block" : "none";
 }
@@ -210,6 +219,7 @@ async function fetchNews() {
     if (fullArticles.length === 0) {
       container.innerHTML = "<p>No headlines found. Try again later.</p>";
       document.getElementById("next-btn").style.display = "none";
+      document.getElementById("prev-btn").style.display = "none";
       return;
     }
 
@@ -218,12 +228,20 @@ async function fetchNews() {
     console.error("Mirror Intel Error:", error);
     container.innerHTML = "<p>⚠️ Unable to fetch news. Please check the connection or server logs.</p>";
     document.getElementById("next-btn").style.display = "none";
+    document.getElementById("prev-btn").style.display = "none";
   }
 }
 
 function showNextPage() {
   currentPage++;
   displayArticles(currentPage * pageSize);
+}
+
+function showPreviousPage() {
+  if (currentPage > 0) {
+    currentPage--;
+    displayArticles(currentPage * pageSize);
+  }
 }
 </script>
 
