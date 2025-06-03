@@ -82,7 +82,8 @@
 </script>
 
 <button onclick="fetchNews()">Fetch Today’s Headlines</button>
-<div id="news-container"></div>
+<div id="news-container"></div
+<button id="next-btn" onclick="showNextPage()" style="display:none;">Next ➡️</button>
 
 <button onclick="summarizeNews()">🧠 Generate Mirror Summary</button>
 <button onclick="generateAIDigest()">🤖 AI Mirror Digest</button>
@@ -193,6 +194,63 @@ function saveToVisionFlow() {
   alert("🧠 Summary saved to VisionFlow (simulated). Future: Connect to backend vault.");
 }
 </script>
+let fullArticles = [];
+let currentPage = 0;
+const pageSize = 5;
 
+function displayArticles(startIndex) {
+  const container = document.getElementById("news-container");
+  container.innerHTML = "";
+
+  const pageArticles = fullArticles.slice(startIndex, startIndex + pageSize);
+
+  pageArticles.forEach((article, index) => {
+    const div = document.createElement("div");
+    div.className = "headline";
+    div.innerHTML = `
+      <div><strong>#${startIndex + index + 1}</strong></div>
+      <div><a href="${article.url}" target="_blank">${article.title}</a></div>
+      <div>${article.description || "No summary available."}</div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Show or hide the Next button
+  document.getElementById("next-btn").style.display =
+    startIndex + pageSize < fullArticles.length ? "inline-block" : "none";
+}
+
+async function fetchNews() {
+  const container = document.getElementById("news-container");
+  container.innerHTML = "<p>🧠 Scanning selected news feed...</p>";
+
+  try {
+    const selected = document.getElementById("source-select").value;
+    const topic = document.getElementById("topic-select").value;
+    const res = await fetch(`/api/fetch-news?source=${selected}&topic=${topic}`);
+    const data = await res.json();
+
+    fullArticles = data.articles || [];
+    currentPage = 0;
+
+    if (fullArticles.length === 0) {
+      container.innerHTML = "<p>No headlines found. Try again later.</p>";
+      document.getElementById("next-btn").style.display = "none";
+      return;
+    }
+
+    displayArticles(0);
+  } catch (error) {
+    console.error("Mirror Intel Error:", error);
+    container.innerHTML = "<p>⚠️ Unable to fetch news. Please check the connection or server logs.</p>";
+    document.getElementById("next-btn").style.display = "none";
+  }
+}
+
+function showNextPage() {
+  currentPage++;
+  displayArticles(currentPage * pageSize);
+}
+</script>
 </body>
 </html>
