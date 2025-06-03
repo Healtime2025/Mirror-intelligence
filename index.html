@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mirror Intel – Daily News Briefing</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      padding: 30px;
+      color: #333;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 { color: #1e2a78; }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #1e2a78;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 10px 10px 20px 0;
+    }
+    select {
+      padding: 8px;
+      margin-right: 10px;
+    }
+    .headline {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .headline a {
+      text-decoration: none;
+      color: #1e2a78;
+      font-weight: bold;
+    }
+    #mirror-summary, #gpt-digest {
+      margin-top: 20px;
+      font-style: italic;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Mirror Intel</h1>
+  <select id="source-select">
+    <option value="bbc">BBC</option>
+    <option value="cnn">CNN</option>
+    <option value="aljazeera">Al Jazeera</option>
+    <option value="news24">News24</option>
+    <option value="iol">IOL</option>
+    <option value="timeslive">TimesLIVE</option>
+    <option value="maverick">Daily Maverick</option>
+    <option value="mg">Mail & Guardian</option>
+  </select>
+
+  <select id="category-select">
+    <option value="all">All</option>
+    <option value="business">Business</option>
+    <option value="world">World</option>
+    <option value="politics">Politics</option>
+    <option value="health">Health</option>
+    <option value="markets">Markets</option>
+    <option value="tech">AI & Tech</option>
+  </select>
+
+  <button onclick="fetchNews()">📰 Fetch News</button>
+  <button onclick="summarizeNews()">🧠 AI Digest</button>
+
+  <div id="headlines"></div>
+  <div id="gpt-digest"></div>
+
+  <script>
+    let currentArticles = [];
+
+    async function fetchNews() {
+      const source = document.getElementById("source-select").value;
+      const category = document.getElementById("category-select").value;
+      const res = await fetch(`/api/fetch-news?source=${source}&category=${category}`);
+      const data = await res.json();
+
+      const container = document.getElementById("headlines");
+      container.innerHTML = "";
+      currentArticles = data.articles || [];
+
+      if (!currentArticles.length) {
+        container.innerHTML = "<p>No headlines found. Try again later.</p>";
+        return;
+      }
+
+      currentArticles.forEach(a => {
+        const div = document.createElement("div");
+        div.className = "headline";
+        div.innerHTML = `<a href="${a.url}" target="_blank">${a.title}</a><p>${a.description}</p>`;
+        container.appendChild(div);
+      });
+    }
+
+    async function summarizeNews() {
+      const res = await fetch("/api/gpt-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ articles: currentArticles })
+      });
+      const data = await res.json();
+      document.getElementById("gpt-digest").textContent = data.summary || "No digest available.";
+    }
+  </script>
+</body>
+</html>
