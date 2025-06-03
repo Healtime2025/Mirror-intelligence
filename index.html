@@ -82,7 +82,7 @@
 </script>
 
 <button onclick="fetchNews()">Fetch Today’s Headlines</button>
-<div id="news-container"></div
+<div id="news-container"></div>
 <button id="next-btn" onclick="showNextPage()" style="display:none;">Next ➡️</button>
 
 <button onclick="summarizeNews()">🧠 Generate Mirror Summary</button>
@@ -94,7 +94,6 @@
 <div id="gpt-digest"></div>
 
 <script>
-
 function summarizeNews() {
   const articles = document.querySelectorAll(".headline");
   const summaryBox = document.getElementById("mirror-summary");
@@ -163,6 +162,9 @@ function saveToVisionFlow() {
   alert("🧠 Summary saved to VisionFlow (simulated). Future: Connect to backend vault.");
 }
 </script>
+
+<!-- ✅ Wrapped Pagination Logic in Correct Script Tag -->
+<script>
 let fullArticles = [];
 let currentPage = 0;
 const pageSize = 5;
@@ -184,7 +186,6 @@ function displayArticles(startIndex) {
     container.appendChild(div);
   });
 
-  // Show or hide the Next button
   document.getElementById("next-btn").style.display =
     startIndex + pageSize < fullArticles.length ? "inline-block" : "none";
 }
@@ -221,5 +222,6 @@ function showNextPage() {
   displayArticles(currentPage * pageSize);
 }
 </script>
+
 </body>
 </html>
