@@ -32,8 +32,11 @@ GPT Digest:`;
     const summary = completion.data.choices[0].message.content;
     res.status(200).json({ summary });
 
-  } catch (error) {
-    console.error("❌ GPT API Error:", error.message);
-    res.status(500).json({ error: "GPT summarization failed" });
-  }
+catch (error) {
+  console.error("❌ GPT API Error:", error.message || error);
+
+  // Send a proper JSON error message
+  res.status(500).json({ error: "GPT summarization failed" });
+}
+
 };
