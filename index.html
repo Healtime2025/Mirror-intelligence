@@ -13,7 +13,9 @@
       max-width: 800px;
       margin: auto;
     }
-    h1 { color: #1e2a78; }
+    h1 {
+      color: #1e2a78;
+    }
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -22,10 +24,7 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      margin: 10px 10px 20px 0;
-    }
-    select {
-      padding: 8px;
+      margin-bottom: 20px;
       margin-right: 10px;
     }
     .headline {
@@ -48,99 +47,129 @@
   </style>
 </head>
 <body>
-  <h1>🧠 Mirror Intel</h1>
+<h1>🧠 Mirror Intel – Daily News Briefing</h1>
 
-  <select id="source-select">
-    <option value="bbc">BBC</option>
-    <option value="cnn">CNN</option>
-    <option value="aljazeera">Al Jazeera</option>
-    <option value="news24">News24</option>
-    <option value="iol">IOL</option>
-    <option value="timeslive">TimesLIVE</option>
-    <option value="maverick">Daily Maverick</option>
-    <option value="mg">Mail & Guardian</option>
-  </select>
+<!-- 🌐 Source Selector -->
+<label for="source-select"><strong>🌐 Select News Source:</strong></label>
+<select id="source-select" style="margin-bottom: 20px; padding: 8px; font-size: 16px;">
+  <option disabled selected>────────</option>
+  <option value="bbc">🌐 BBC World</option>
+  <option value="cnn">🌐 CNN</option>
+  <option value="aljazeera">🌐 Al Jazeera</option>
+  <option value="timeslive">🇿🇦 ZA TimesLIVE</option>
+  <option value="mg">🇿🇦 ZA Mail & Guardian</option>
+</select>
 
-  <select id="category-select">
-    <option value="all">All</option>
-    <option value="business">Business</option>
-    <option value="world">World</option>
-    <option value="politics">Politics</option>
-    <option value="health">Health</option>
-    <option value="markets">Markets</option>
-    <option value="tech">AI & Tech</option>
-  </select>
+<button onclick="fetchNews()">Fetch Today’s Headlines</button>
+<div id="news-container"></div>
 
-  <button onclick="fetchNews()">📰 Fetch News</button>
-  <button onclick="summarizeNews()">🧠 AI Digest</button>
 
-  <div id="headlines"></div>
+  <button onclick="summarizeNews()">🧠 Generate Mirror Summary</button>
+  <button onclick="generateAIDigest()">🤖 AI Mirror Digest</button>
+  <button onclick="speakSummary()">🔊 Speak Briefing</button>
+  <button onclick="saveToVisionFlow()">📥 Save to VisionFlow</button>
+
+  <div id="mirror-summary"></div>
   <div id="gpt-digest"></div>
 
   <script>
-    let currentArticles = [];
+ async function fetchNews() {
+  const container = document.getElementById("news-container");
+  container.innerHTML = "<p>🧠 Scanning selected news feed...</p>";
 
-    async function fetchNews() {
-      const source = document.getElementById("source-select").value;
-      const category = document.getElementById("category-select").value;
-      const container = document.getElementById("headlines");
-      container.innerHTML = "<p>🔍 Fetching news...</p>";
-      document.getElementById("gpt-digest").textContent = "";
+  try {
+    const selected = document.getElementById("source-select").value;
+    const res = await fetch(`/api/fetch-news?source=${selected}`);
+    const data = await res.json();
 
-      try {
-        const res = await fetch(`/api/fetch-news?source=${source}&category=${category}`);
-        const data = await res.json();
-
-        currentArticles = data.articles || [];
-        container.innerHTML = "";
-
-        if (!currentArticles.length) {
-          container.innerHTML = "<p>No headlines found. Try again later.</p>";
-          return;
-        }
-
-        currentArticles.forEach(a => {
-          const div = document.createElement("div");
-          div.className = "headline";
-          div.innerHTML = `<a href="${a.url}" target="_blank">${a.title}</a><p>${a.description}</p>`;
-          container.appendChild(div);
-        });
-
-      } catch (error) {
-        container.innerHTML = `<p>⚠️ Failed to fetch news. Check your network or server logs.</p>`;
-        console.error("Fetch Error:", error);
-      }
+    if (!data.articles || data.articles.length === 0) {
+      container.innerHTML = "<p>No headlines found. Try again later.</p>";
+      return;
     }
 
-    async function summarizeNews() {
+    container.innerHTML = "";
+    data.articles.forEach((article, index) => {
+      const div = document.createElement("div");
+      div.className = "headline";
+      div.innerHTML = `
+        <div><strong>#${index + 1}</strong></div>
+        <div><a href="${article.url}" target="_blank">${article.title}</a></div>
+        <div>${article.description || "No summary available."}</div>
+      `;
+      container.appendChild(div);
+    });
+  } catch (error) {
+    console.error("Mirror Intel Error:", error);
+    container.innerHTML = "<p>⚠️ Unable to fetch news. Please check the connection or server logs.</p>";
+  }
+}
+
+    function summarizeNews() {
+      const articles = document.querySelectorAll(".headline");
+      const summaryBox = document.getElementById("mirror-summary");
+
+      if (articles.length === 0) {
+        summaryBox.textContent = "⚠️ Please fetch headlines first.";
+        return;
+      }
+
+      let content = "";
+      articles.forEach((a, i) => {
+        const title = a.querySelector("a").innerText;
+        const desc = a.querySelector("div:last-child").innerText;
+        content += `${i + 1}. ${title} - ${desc}\n`;
+      });
+
+      const basicSummary = `Mirror Summary:\n\n${content.split("\n").slice(0, 3).join("\n")}`;
+      summaryBox.textContent = basicSummary;
+    }
+
+    async function generateAIDigest() {
       const summaryBox = document.getElementById("gpt-digest");
       summaryBox.textContent = "🤖 Thinking... generating digest...";
 
+      const articles = [];
+      document.querySelectorAll('.headline').forEach((el) => {
+        const title = el.querySelector('a')?.innerText || '';
+        const description = el.querySelector('div:last-child')?.innerText || '';
+        articles.push({ title, description });
+      });
+
       try {
-        const res = await fetch('/api/gpt-summary', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ articles: currentArticles })
-        });
+       const res = await fetch('/api/gpt-summary', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ articles }),
+});
 
-        let result;
-        try {
-          result = await res.json();
-        } catch (e) {
-          summaryBox.textContent = "⚠️ Failed to parse GPT response.";
-          return;
-        }
+if (!res.ok) {
+  throw new Error('Server returned error');
+}
 
-        if (result.error) {
-          summaryBox.textContent = "⚠️ Failed to generate GPT digest.";
-        } else {
-          summaryBox.textContent = `🧠 GPT Digest:\n\n${result.summary}`;
-        }
+const result = await res.json();
+summaryBox.textContent = `🧠 GPT Digest:\n\n${result.summary}`;
 
       } catch (error) {
-        summaryBox.textContent = "⚠️ GPT request failed. See console.";
-        console.error("GPT Error:", error);
+        console.error("GPT Summary Error:", error);
+        summaryBox.textContent = "⚠️ Failed to generate GPT digest.";
       }
+    }
+
+    function speakSummary() {
+      const summary = document.getElementById("mirror-summary").innerText;
+      if (!summary) return;
+      const utterance = new SpeechSynthesisUtterance(summary);
+      speechSynthesis.speak(utterance);
+    }
+
+    function saveToVisionFlow() {
+      const summary = document.getElementById("mirror-summary").innerText;
+      if (!summary) {
+        alert("Nothing to save. Generate summary first.");
+        return;
+      }
+      console.log("🗂 Summary saved to VisionFlow:", summary);
+      alert("🧠 Summary saved to VisionFlow (simulated). Future: Connect to backend vault.");
     }
   </script>
 </body>
