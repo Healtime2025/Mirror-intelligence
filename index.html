@@ -12,10 +12,9 @@
       color: #333;
       max-width: 800px;
       margin: auto;
+      transition: background 0.4s, color 0.4s;
     }
-    h1 {
-      color: #1e2a78;
-    }
+    h1 { color: #1e2a78; }
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -24,8 +23,7 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      margin-bottom: 20px;
-      margin-right: 10px;
+      margin: 10px 10px 20px 0;
     }
     select {
       padding: 8px;
@@ -38,23 +36,61 @@
       margin-bottom: 15px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    .headline.breaking {
+      border-left: 6px solid red;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+      from { background-color: #fff; }
+      to { background-color: #ffe5e5; }
     }
     .headline a {
       text-decoration: none;
       color: #1e2a78;
       font-weight: bold;
     }
+    .share-icons {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    .share-icon {
+      cursor: pointer;
+      opacity: 0.7;
+      transition: transform 0.2s;
+    }
+    .share-icon:hover::after {
+      content: attr(data-label);
+      position: absolute;
+      top: -25px;
+      background: #333;
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
     #mirror-summary, #gpt-digest {
       margin-top: 20px;
       font-style: italic;
       white-space: pre-line;
     }
+    .dark-mode {
+      background: #222;
+      color: #eee;
+    }
+    .dark-mode .headline { background: #333; }
+    .dark-mode .headline a { color: #aaddff; }
+    .dark-mode button { background: #444; color: #fff; }
   </style>
 </head>
 <body>
 <h1>🧠 Mirror Intel – Daily News Briefing</h1>
 
-<!-- Source Selector -->
 <label><strong>🌐 Select News Source:</strong></label>
 <select id="source-select">
   <option disabled selected>────────</option>
@@ -65,7 +101,6 @@
   <option value="mg">🇿🇦 ZA Mail & Guardian</option>
 </select>
 
-<!-- Topic Selector -->
 <label><strong>🧠 Choose Topic:</strong></label>
 <select id="topic-select">
   <option value="">-- All Topics --</option>
@@ -79,102 +114,20 @@
   <option value="africa">Africa</option>
 </select>
 
-<script>
-  document.getElementById("topic-select").addEventListener("change", function () {
-    const topic = this.value;
-    console.log("🔍 Selected Topic:", topic);
-  });
-</script>
+<button onclick="fetchNews()">🔄 Refresh Feed</button>
+<button onclick="summarizeNews()">🧠 Mirror Summary</button>
+<button onclick="generateAIDigest()">🤖 GPT Digest</button>
+<button onclick="speakSummary()">🔊 Speak</button>
+<button onclick="saveToVisionFlow()">📥 Save</button>
+<button onclick="toggleDarkMode()">🌓 Dark Mode</button>
 
-<!-- Fetch Button -->
-<button onclick="fetchNews()">Fetch Today’s Headlines</button>
-
-<!-- Display Area -->
 <div id="news-container"></div>
-
-<!-- ✅ PATCH: Prev + Next buttons -->
-<button id="prev-btn" onclick="showPreviousPage()" style="display:none;">⬅️ Previous</button>
+<button id="prev-btn" onclick="showPrevPage()" style="display:none;">⬅️ Prev</button>
 <button id="next-btn" onclick="showNextPage()" style="display:none;">Next ➡️</button>
-
-<!-- Control Buttons -->
-<button onclick="summarizeNews()">🧠 Generate Mirror Summary</button>
-<button onclick="generateAIDigest()">🤖 AI Mirror Digest</button>
-<button onclick="speakSummary()">🔊 Speak Briefing</button>
-<button onclick="saveToVisionFlow()">📥 Save to VisionFlow</button>
 
 <div id="mirror-summary"></div>
 <div id="gpt-digest"></div>
 
-<script>
-function summarizeNews() {
-  const articles = document.querySelectorAll(".headline");
-  const summaryBox = document.getElementById("mirror-summary");
-
-  if (articles.length === 0) {
-    summaryBox.textContent = "⚠️ Please fetch headlines first.";
-    return;
-  }
-
-  let content = "";
-  articles.forEach((a, i) => {
-    const title = a.querySelector("a").innerText;
-    const desc = a.querySelector("div:last-child").innerText;
-    content += `${i + 1}. ${title} - ${desc}\n`;
-  });
-
-  const basicSummary = `Mirror Summary:\n\n${content.split("\n").slice(0, 3).join("\n")}`;
-  summaryBox.textContent = basicSummary;
-}
-
-async function generateAIDigest() {
-  const summaryBox = document.getElementById("gpt-digest");
-  summaryBox.textContent = "🤖 Thinking... generating digest...";
-
-  const articles = [];
-  document.querySelectorAll('.headline').forEach((el) => {
-    const title = el.querySelector('a')?.innerText || '';
-    const description = el.querySelector('div:last-child')?.innerText || '';
-    articles.push({ title, description });
-  });
-
-  try {
-    const res = await fetch('/api/gpt-summary', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ articles }),
-    });
-
-    if (!res.ok) {
-      throw new Error('Server returned error');
-    }
-
-    const result = await res.json();
-    summaryBox.textContent = `🧠 GPT Digest:\n\n${result.summary}`;
-  } catch (error) {
-    console.error("GPT Summary Error:", error);
-    summaryBox.textContent = "⚠️ Failed to generate GPT digest.";
-  }
-}
-
-function speakSummary() {
-  const summary = document.getElementById("mirror-summary").innerText;
-  if (!summary) return;
-  const utterance = new SpeechSynthesisUtterance(summary);
-  speechSynthesis.speak(utterance);
-}
-
-function saveToVisionFlow() {
-  const summary = document.getElementById("mirror-summary").innerText;
-  if (!summary) {
-    alert("Nothing to save. Generate summary first.");
-    return;
-  }
-  console.log("🗂 Summary saved to VisionFlow:", summary);
-  alert("🧠 Summary saved to VisionFlow (simulated). Future: Connect to backend vault.");
-}
-</script>
-
-<!-- ✅ Pagination Script with Previous + Next -->
 <script>
 let fullArticles = [];
 let currentPage = 0;
@@ -187,20 +140,34 @@ function displayArticles(startIndex) {
   const pageArticles = fullArticles.slice(startIndex, startIndex + pageSize);
 
   pageArticles.forEach((article, index) => {
+    const isBreaking = article.title.toLowerCase().includes("breaking") || article.description.toLowerCase().includes("breaking");
     const div = document.createElement("div");
-    div.className = "headline";
+    div.className = `headline${isBreaking ? ' breaking' : ''}`;
     div.innerHTML = `
       <div><strong>#${startIndex + index + 1}</strong></div>
       <div><a href="${article.url}" target="_blank">${article.title}</a></div>
       <div>${article.description || "No summary available."}</div>
+      <div class="share-icons">
+        <span class="share-icon" data-label="Copy Link" onclick="copyToClipboard('${article.url}')">🔗</span>
+        <span class="share-icon" data-label="WhatsApp" onclick="shareWhatsApp('${article.url}')">📲</span>
+        <span class="share-icon" data-label="Bookmark" onclick="bookmarkArticle(${startIndex + index})">🔖</span>
+      </div>
     `;
     container.appendChild(div);
   });
 
-  // Show/hide navigation buttons
-  document.getElementById("prev-btn").style.display = currentPage > 0 ? "inline-block" : "none";
-  document.getElementById("next-btn").style.display =
-    startIndex + pageSize < fullArticles.length ? "inline-block" : "none";
+  document.getElementById("next-btn").style.display = startIndex + pageSize < fullArticles.length ? "inline-block" : "none";
+  document.getElementById("prev-btn").style.display = startIndex > 0 ? "inline-block" : "none";
+}
+
+function showNextPage() {
+  currentPage++;
+  displayArticles(currentPage * pageSize);
+}
+
+function showPrevPage() {
+  if (currentPage > 0) currentPage--;
+  displayArticles(currentPage * pageSize);
 }
 
 async function fetchNews() {
@@ -216,34 +183,84 @@ async function fetchNews() {
     fullArticles = data.articles || [];
     currentPage = 0;
 
-    if (fullArticles.length === 0) {
-      container.innerHTML = "<p>No headlines found. Try again later.</p>";
-      document.getElementById("next-btn").style.display = "none";
-      document.getElementById("prev-btn").style.display = "none";
-      return;
-    }
-
     displayArticles(0);
-  } catch (error) {
-    console.error("Mirror Intel Error:", error);
-    container.innerHTML = "<p>⚠️ Unable to fetch news. Please check the connection or server logs.</p>";
-    document.getElementById("next-btn").style.display = "none";
-    document.getElementById("prev-btn").style.display = "none";
+  } catch (err) {
+    console.error("❌ Fetch Error:", err);
+    container.innerHTML = "<p>⚠️ Unable to load news. Check connection.</p>";
   }
 }
 
-function showNextPage() {
-  currentPage++;
-  displayArticles(currentPage * pageSize);
+function summarizeNews() {
+  const articles = document.querySelectorAll(".headline");
+  const summaryBox = document.getElementById("mirror-summary");
+  if (articles.length === 0) return summaryBox.textContent = "⚠️ Fetch headlines first.";
+
+  let content = "";
+  articles.forEach((a, i) => {
+    const title = a.querySelector("a").innerText;
+    const desc = a.querySelector("div:last-child").innerText;
+    content += `${i + 1}. ${title} - ${desc}\n`;
+  });
+  summaryBox.textContent = `Mirror Summary:\n\n${content.split("\n").slice(0, 3).join("\n")}`;
 }
 
-function showPreviousPage() {
-  if (currentPage > 0) {
-    currentPage--;
-    displayArticles(currentPage * pageSize);
+async function generateAIDigest() {
+  const summaryBox = document.getElementById("gpt-digest");
+  summaryBox.textContent = "🤖 Thinking...";
+  const articles = [];
+  document.querySelectorAll('.headline').forEach((el) => {
+    const title = el.querySelector('a')?.innerText || '';
+    const description = el.querySelector('div:last-child')?.innerText || '';
+    articles.push({ title, description });
+  });
+  try {
+    const res = await fetch('/api/gpt-summary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articles })
+    });
+    const result = await res.json();
+    summaryBox.textContent = `🧠 GPT Digest:\n\n${result.summary}`;
+  } catch (err) {
+    summaryBox.textContent = "⚠️ Failed to generate GPT digest.";
   }
 }
+
+function speakSummary() {
+  const summary = document.getElementById("mirror-summary").innerText;
+  if (summary) speechSynthesis.speak(new SpeechSynthesisUtterance(summary));
+}
+
+function saveToVisionFlow() {
+  const summary = document.getElementById("mirror-summary").innerText;
+  if (!summary) return alert("Generate summary first.");
+  alert("🧠 Saved to VisionFlow (simulated).");
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+}
+
+function copyToClipboard(url) {
+  navigator.clipboard.writeText(url);
+  alert("🔗 Link copied to clipboard");
+}
+
+function shareWhatsApp(url) {
+  const message = `📰 Check this out: ${url}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+}
+
+function bookmarkArticle(index) {
+  const article = fullArticles[index];
+  const saved = JSON.parse(localStorage.getItem("mirrorBookmarks") || "[]");
+  saved.push(article);
+  localStorage.setItem("mirrorBookmarks", JSON.stringify(saved));
+  alert("🔖 Article bookmarked!");
+}
+
+// Auto refresh every 10 minutes
+setInterval(fetchNews, 600000);
 </script>
-
 </body>
 </html>
