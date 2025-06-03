@@ -17,7 +17,7 @@ const sources = {
 };
 
 module.exports = async (req, res) => {
-  const { source } = req.query;
+  const { source, topic } = req.query;
   const feedUrl = sources[source] || sources.bbc;
 
   try {
@@ -27,11 +27,23 @@ module.exports = async (req, res) => {
       return res.status(200).json({ articles: [] });
     }
 
-    const trimmed = parsed.items.slice(0, 5).map(item => ({
+    let articles = parsed.items.map(item => ({
       title: item.title || "Untitled",
       url: item.link,
       description: item.contentSnippet || item.content || "No summary."
     }));
+
+    // 🔍 Filter by topic keyword if provided
+    if (topic && topic.trim() !== "") {
+      const keyword = topic.toLowerCase();
+      articles = articles.filter(a =>
+        (a.title && a.title.toLowerCase().includes(keyword)) ||
+        (a.description && a.description.toLowerCase().includes(keyword))
+      );
+    }
+
+    // Trim to top 5 after filtering
+    const trimmed = articles.slice(0, 5);
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({ articles: trimmed });
