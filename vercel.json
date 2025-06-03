@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/fetch-news", "destination": "/api/fetch-news.js" }
+  ]
+}
