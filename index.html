@@ -88,6 +88,25 @@
     .dark-mode button { background: #444; color: #fff; }
   </style>
 </head>
+  <!-- Manifest & Theme -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e2a78">
+
+<!-- Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="/mirrorintel-icon-192.png">
+<link rel="apple-touch-icon" href="/mirrorintel-icon-512.png">
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log("Service Worker registered"))
+        .catch(err => console.error("SW registration failed", err));
+    });
+  }
+</script>
+
 <body>
 <h1>🧠 Mirror Intel – Daily News Briefing</h1>
 
