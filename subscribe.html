@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subscribe – GraceVoice</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      text-align: center;
+      padding: 60px;
+    }
+    h1 {
+      color: #1976d2;
+      font-size: 36px;
+    }
+    p {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .paypal-button-container {
+      display: inline-block;
+      margin-bottom: 30px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #145a9e;
+    }
+  </style>
+</head>
+<body>
+  <h1>🙏 Subscribe to GraceVoice</h1>
+  <p>Support the mission and get access to premium features!</p>
+
+  <!-- PAYPAL SUBSCRIPTION BUTTON -->
+  <div class="paypal-button-container">
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+      <input type="hidden" name="cmd" value="_xclick-subscriptions">
+      <input type="hidden" name="business" value="your-paypal-email@example.com">
+      <input type="hidden" name="item_name" value="GraceVoice Monthly Supporter">
+      <input type="hidden" name="currency_code" value="USD">
+      <input type="hidden" name="a3" value="5.00"> <!-- Amount per billing cycle -->
+      <input type="hidden" name="p3" value="1">    <!-- Billing cycle length -->
+      <input type="hidden" name="t3" value="M">    <!-- Billing cycle unit (M = monthly) -->
+      <input type="hidden" name="src" value="1">   <!-- Recurring payments -->
+      <input type="hidden" name="sra" value="1">   <!-- Reattempt on failure -->
+
+      <!-- Redirects -->
+      <input type="hidden" name="return" value="https://yourdomain.com/thank-you.html">
+      <input type="hidden" name="cancel_return" value="https://yourdomain.com/cancel-subscription.html">
+
+      <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif"
+             border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+      <img alt="" border="0" src="https://www.paypal.com/en_ZA/i/scr/pixel.gif" width="1" height="1">
+    </form>
+  </div>
+
+  <br>
+  <button onclick="window.location.href='index.html'">🏠 Return to Home</button>
+</body>
+</html>
