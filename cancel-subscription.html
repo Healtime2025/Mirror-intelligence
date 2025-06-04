@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subscription Cancelled – GraceVoice</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      background-color: #fff6f6;
+      padding: 60px;
+      animation: fadeIn 2s ease-in;
+    }
+    h1 {
+      color: #c62828;
+      font-size: 36px;
+    }
+    p {
+      font-size: 18px;
+      color: #555;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #c62828;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #a00000;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <!-- Replace with your Google Analytics ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+</head>
+<body>
+  <h1>💔 Subscription Cancelled</h1>
+  <p>You’ve cancelled the process. No payment was made.</p>
+  <button onclick="window.location.href='index.html'">🏠 Return to Home</button>
+
+  <script>
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 10000); // 10 seconds
+  </script>
+</body>
+</html>
